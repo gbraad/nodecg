@@ -21,7 +21,7 @@ test('scripts get injected into /instance/*.html routes', async t => {
 });
 
 test.serial.cb('shouldn\'t enter an infinite redirect loop when including a polymer element that loads an external stylesheet', t => {
-	const singleInstance = require('../lib/graphics/single_instance');
+	const registration = require('../lib/graphics/registration');
 
 	function cb(url) {
 		if (url === '/bundles/test-bundle/graphics/single_instance.html') {
@@ -30,11 +30,11 @@ test.serial.cb('shouldn\'t enter an infinite redirect loop when including a poly
 	}
 
 	process.nextTick(() => {
-		singleInstance.once('graphicAvailable', cb);
+		registration.once('graphicAvailable', cb);
 	});
 
 	setTimeout(() => {
-		singleInstance.removeListener('graphicAvailable', cb);
+		registration.removeListener('graphicAvailable', cb);
 		t.end();
 	}, 5000);
 });
@@ -44,7 +44,7 @@ test.serial('should redirect to busy.html when the instance is already taken', a
 	await e.sleep(1000);
 	t.is(
 		await e.browser.client.getUrl(),
-		`${C.ROOT_URL}instance/busy.html?path=/bundles/test-bundle/graphics/single_instance.html`
+		`${C.ROOT_URL}instance/busy.html?pathname=/bundles/test-bundle/graphics/single_instance.html`
 	);
 });
 
@@ -59,7 +59,7 @@ test.serial('should redirect to killed.html when the instance is killed', async 
 	await e.browser.client.switchTab(e.browser.tabs.singleInstance);
 	t.is(
 		await e.browser.client.getUrl(),
-		`${C.ROOT_URL}instance/killed.html?path=/bundles/test-bundle/graphics/single_instance.html`
+		`${C.ROOT_URL}instance/killed.html?pathname=/bundles/test-bundle/graphics/single_instance.html`
 	);
 });
 

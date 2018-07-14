@@ -1,0 +1,27 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"type": "array",
+	"default": [],
+	"items": {
+		"type": "object",
+		"additionalProperties": false,
+		"properties": {
+			"bundleName": {
+				"type": "string"
+			},
+			"bundleGit": {
+				"type": "object"
+			},
+			"pathName": {
+				"type": "string"
+			},
+			"singleInstance": {
+				"type": "boolean"
+			},
+			"socketId": {
+				"type": "string"
+			}
+		},
+		"required": ["bundleName", "pathName", "socketId"]
+	}
+}

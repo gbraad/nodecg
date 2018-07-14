@@ -1,4 +1,9 @@
-class NcgGraphics extends Polymer.Element {
+/**
+ * @customElement
+ * @polymer
+ * @appliesMixin Polymer.MutableData
+ */
+class NcgGraphics extends Polymer.MutableData(Polymer.Element) {
 	static get is() {
 		return 'ncg-graphics';
 	}
@@ -10,39 +15,20 @@ class NcgGraphics extends Polymer.Element {
 				value: window.__renderData__.bundles.filter(bundle => {
 					return bundle.graphics && bundle.graphics.length > 0;
 				})
-			}
+			},
+			_graphicInstances: Array
 		};
 	}
 
 	ready() {
 		super.ready();
-
 		const instancesList = this.$.instancesList;
 		const empty = this.$['instancesList-empty'];
-		const liveSocketIds = new NodeCG.Replicant('liveSocketIds', '_singleInstance');
+		const instancesRep = new NodeCG.Replicant('graphics:instances', 'nodecg');
 
-		liveSocketIds.on('change', newVal => {
-			// Remove all currently listed instances
-			while (instancesList.firstChild) {
-				instancesList.removeChild(instancesList.firstChild);
-			}
-
-			// Add the new instances
-			if (typeof newVal === 'object') {
-				for (const url in newVal) {
-					if (!{}.hasOwnProperty.call(newVal, url)) {
-						continue;
-					}
-
-					if (!newVal[url]) {
-						return;
-					}
-
-					const siEl = document.createElement('ncg-single-instance');
-					siEl.url = url;
-					instancesList.appendChild(siEl);
-				}
-			}
+		instancesRep.on('change', newVal => {
+			console.log(JSON.stringify(newVal, null, 2));
+			this._graphicInstances = newVal;
 		});
 
 		// Observe #instancesList
@@ -107,6 +93,10 @@ class NcgGraphics extends Polymer.Element {
 		}
 
 		return absUrl;
+	}
+
+	_isSingleInstance(registration) {
+		return registration && registration.singleInstance;
 	}
 }
 
