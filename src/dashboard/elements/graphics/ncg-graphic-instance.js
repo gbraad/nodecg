@@ -62,6 +62,10 @@
 				return '';
 			}
 
+			if (!instance.open) {
+				return 'closed';
+			}
+
 			return instance.potentiallyOutOfDate ? 'out-of-date' : 'nominal';
 		}
 
@@ -82,6 +86,8 @@
 					return 'Latest';
 				case 'out-of-date':
 					return responsiveMode === 'wide' ? 'Potentially Out of Date' : 'Out of Date';
+				case 'closed':
+					return 'Closed';
 				default:
 					return 'Error';
 			}

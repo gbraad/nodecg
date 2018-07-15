@@ -30,6 +30,9 @@
 			"socketId": {
 				"type": "string"
 			},
+			"open": {
+				"type": "boolean"
+			},
 			"potentiallyOutOfDate": {
 				"type": "boolean"
 			}
@@ -42,6 +45,7 @@
 			"pathName",
 			"singleInstance",
 			"socketId",
+			"open",
 			"potentiallyOutOfDate"
 		]
 	}

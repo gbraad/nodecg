@@ -105,11 +105,16 @@
 		}
 
 		_computeWorstStatus(instances) {
-			if (!instances || instances.length <= 0) {
+			if (!instances) {
 				return 'none';
 			}
 
-			const outOfDateInstance = instances.find(instance => instance.potentiallyOutOfDate);
+			const openInstances = instances.filter(instance => instance.open);
+			if (openInstances.length <= 0) {
+				return 'none';
+			}
+
+			const outOfDateInstance = openInstances.find(instance => instance.potentiallyOutOfDate);
 			return outOfDateInstance ? 'out-of-date' : 'nominal';
 		}
 
@@ -118,7 +123,7 @@
 				return 'S';
 			}
 
-			return instances ? instances.length : '?';
+			return instances ? instances.filter(instance => instance.open).length : '?';
 		}
 
 		_computeCollapseIcon(_collapseOpened) {
