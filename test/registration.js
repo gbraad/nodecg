@@ -13,14 +13,14 @@ test.beforeEach(async () => {
 	await e.browser.client.switchTab(e.browser.tabs.singleInstance);
 });
 
-test('scripts get injected into /instance/*.html routes', async t => {
+test('singleInstance - scripts get injected into /instance/*.html routes', async t => {
 	const response = await axios.get(`${C.ROOT_URL}instance/killed.html`);
 	t.is(response.status, 200);
 	t.true(response.data.includes('<script src="/nodecg-api.min.js">'));
 	t.true(response.data.includes('<script src="/socket.io/socket.io.js"></script>'));
 });
 
-test.serial.cb('shouldn\'t enter an infinite redirect loop when including a polymer element that loads an external stylesheet', t => {
+test.serial.cb('singleInstance - shouldn\'t enter an infinite redirect loop when including a polymer element that loads an external stylesheet', t => {
 	const registration = require('../lib/graphics/registration');
 
 	function cb(url) {
@@ -39,7 +39,7 @@ test.serial.cb('shouldn\'t enter an infinite redirect loop when including a poly
 	}, 5000);
 });
 
-test.serial('should redirect to busy.html when the instance is already taken', async t => {
+test.serial('singleInstance - should redirect to busy.html when the instance is already taken', async t => {
 	await e.browser.client.newWindow(C.SINGLE_INSTANCE_URL);
 	await e.sleep(1000);
 	t.is(
@@ -48,12 +48,14 @@ test.serial('should redirect to busy.html when the instance is already taken', a
 	);
 });
 
-test.serial('should redirect to killed.html when the instance is killed', async t => {
+test.serial('singleInstance - should redirect to killed.html when the instance is killed', async t => {
 	await e.browser.client.switchTab(e.browser.tabs.dashboard);
 	await e.browser.client.execute(() => {
 		document.querySelector('ncg-dashboard').shadowRoot
 			.querySelector('ncg-graphics').shadowRoot
-			.querySelector('ncg-single-instance').$.kill.click();
+			.querySelector('ncg-graphics-bundle').shadowRoot
+			.querySelectorAll('ncg-graphic')[1].shadowRoot
+			.querySelector('ncg-graphic-instance').$.killButton.click();
 	});
 
 	await e.browser.client.switchTab(e.browser.tabs.singleInstance);
@@ -63,7 +65,7 @@ test.serial('should redirect to killed.html when the instance is killed', async 
 	);
 });
 
-test.serial('should allow the graphic to be taken after being killed', async t => {
+test.serial('singleInstance - should allow the graphic to be taken after being killed', async t => {
 	await e.browser.client.newWindow(C.SINGLE_INSTANCE_URL);
 	t.is(await e.browser.client.getUrl(), C.SINGLE_INSTANCE_URL);
 });
