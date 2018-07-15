@@ -3,6 +3,7 @@
 (function () {
 	'use strict';
 
+	const timestamp = Date.now();
 	let pathname = window.location.pathname;
 
 	// If the pathname ends with /bundleName/ then we must be on index.html.
@@ -34,6 +35,17 @@
 		}
 	});
 
+	window.socket.on('graphic:refreshAll', graphic => {
+		if (!graphic) {
+			return;
+		}
+
+		if (graphic.url === pathname) {
+			/* istanbul ignore next: cant cover navigates page */
+			window.location.reload();
+		}
+	});
+
 	// On page load, register this socket with its URL pathname, so that the server can keep track of it.
 	// In single-instance graphics, this registration will be rejected if the graphic is already open elsewhere.
 	register();
@@ -43,7 +55,7 @@
 
 	function register() {
 		window.socket.emit('graphic:registerSocket', {
-			timestamp: Date.now(),
+			timestamp,
 			pathName: pathname,
 			bundleName: nodecg.bundleName,
 			bundleVersion: nodecg.bundleVersion,

@@ -22,6 +22,10 @@
 
 		static get properties() {
 			return {
+				responsiveMode: {
+					type: String,
+					reflectToAttribute: true
+				},
 				graphic: Object,
 				instance: Object,
 				status: {
@@ -72,12 +76,12 @@
 			}
 		}
 
-		_calcStatusMessage(status) {
+		_calcStatusMessage(status, responsiveMode) {
 			switch (status) {
 				case 'nominal':
 					return 'Latest';
 				case 'out-of-date':
-					return 'Potentially Out of Date';
+					return responsiveMode === 'wide' ? 'Potentially Out of Date' : 'Out of Date';
 				default:
 					return 'Error';
 			}

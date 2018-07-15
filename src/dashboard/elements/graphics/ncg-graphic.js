@@ -52,6 +52,13 @@
 			this._initClipboard(clipboard);
 		}
 
+		reloadAll() {
+			this.$.reloadButton.disabled = true;
+			window.socket.emit('graphic:requestRefreshAll', this.graphic, () => {
+				this.$.reloadButton.disabled = false;
+			});
+		}
+
 		toggleCollapse() {
 			this.$.instancesCollapse.toggle();
 		}

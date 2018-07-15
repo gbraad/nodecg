@@ -169,7 +169,7 @@
 			<iron-icon icon="refresh"></iron-icon>
 		</paper-button>
 
-		<paper-button id="killButton" on-tap="kill">
+		<paper-button id="killButton" on-tap="kill" hidden="[[!graphic.singleInstance]]">
 			<iron-icon icon="close"></iron-icon>
 		</paper-button>
 	</template>
