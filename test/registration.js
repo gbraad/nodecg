@@ -71,6 +71,7 @@ test.serial('singleInstance - should redirect to killed.html when the instance i
 
 test.serial('singleInstance - should allow the graphic to be taken after being killed', async t => {
 	await e.browser.client.newWindow(C.SINGLE_INSTANCE_URL);
+	await e.sleep(500);
 	t.is(await e.browser.client.getUrl(), C.SINGLE_INSTANCE_URL);
 });
 
