@@ -49,7 +49,6 @@
 				font-weight: 500;
 				left: 9px;
 				line-height: normal;
-				padding-right: 8px;
 				text-align: center;
 				width: 38px;
 			}
@@ -68,6 +67,8 @@
 				font-weight: 500;
 				letter-spacing: 0.018em;
 				line-height: normal;
+				max-width: 100%;
+				min-width: 0;
 				overflow: hidden;
 				text-decoration: underline;
 				text-overflow: ellipsis;
@@ -85,7 +86,6 @@
 
 			#copyButton,
 			#reloadButton {
-				width: 115px;
 				--paper-button: {
 					background-color: #6155BD;
 				}
@@ -94,12 +94,9 @@
 			#reloadButton iron-icon {
 				--iron-icon-height: 29px;
 				--iron-icon-width: 29px;
-				margin-left: -6px;
-				margin-right: -1px;
 			}
 
 			#collapseButton {
-				width: 63px;
 				--paper-button: {
 					background-color: #525F78;
 				}
@@ -122,6 +119,7 @@
 				margin: 0 1px;
 				min-width: 0;
 				padding: 0;
+				width: 60px;
 			}
 
 			paper-button:last-child {
@@ -149,19 +147,44 @@
 				height: 50px;
 				width: 1px;
 			}
+
+			:host([responsive-mode="wide"]) #reloadButton {
+				width: 115px;
+			}
+
+			:host([responsive-mode="wide"]) #reloadButton iron-icon {
+				margin-left: -6px;
+				margin-right: -1px;
+			}
 			/* End wide styles */
 
-			:host([responsive-mode="medium"]) #urlAndResolution,
-			:host([responsive-mode="narrow"]) #urlAndResolution {
+			:host(:not([responsive-mode="wide"])) #urlAndResolution {
 				@apply --layout-center-justified;
 				@apply --layout-start;
 				@apply --layout-vertical;
+				padding-right: 6px;
+			}
+
+			:host(:not([responsive-mode="narrow"])) #copyButton {
+				width: 115px;
+			}
+
+			:host([responsive-mode="narrow"]) #copyButton-text {
+				display: none;
+			}
+
+			:host(:not([responsive-mode="wide"])) #reloadButton-text {
+				display: none;
+			}
+
+			:host(:not([responsive-mode="narrow"])) #counter {
+				padding-right: 8px;
 			}
 		</style>
 
-		<iron-media-query query="(min-width: 600px)" query-matches="{{_wide}}"></iron-media-query>
-		<iron-media-query query="(min-width: 500px; max-width: 599px)" query-matches="{{_medium}}"></iron-media-query>
-		<iron-media-query query="(max-width: 499px)" query-matches="{{_narrow}}"></iron-media-query>
+		<iron-media-query query="(min-width: 641px)" query-matches="{{_wide}}"></iron-media-query>
+		<iron-media-query query="(min-width: 521px) and (max-width: 640px)" query-matches="{{_medium}}"></iron-media-query>
+		<iron-media-query query="(max-width: 520px)" query-matches="{{_narrow}}"></iron-media-query>
 
 		<div id="details">
 			<div id="indicator"></div>
@@ -177,12 +200,12 @@
 
 			<paper-button id="copyButton" data-clipboard-text$="[[_computeFullGraphicUrl(graphic.url)]]">
 				<iron-icon icon="content-copy"></iron-icon>
-				&ensp;Copy URL
+				<span id="copyButton-text">&ensp;Copy URL</span>
 			</paper-button>
 
 			<paper-button id="reloadButton" on-tap="reloadAll" disabled="[[_calcReloadAllDisabled(instances)]]">
 				<iron-icon icon="refresh"></iron-icon>
-				&ensp;Reload
+				<span id="reloadButton-text">&ensp;Reload</span>
 			</paper-button>
 
 			<paper-button id="collapseButton" on-tap="toggleCollapse">
@@ -193,6 +216,7 @@
 		<iron-collapse id="instancesCollapse" opened="{{_collapseOpened}}" no-animation>
 			<template is="dom-repeat" items="[[instances]]" as="instance" mutable-data>
 				<ncg-graphic-instance
+					responsive-mode="[[responsiveMode]]"
 					graphic="[[graphic]]"
 					instance="[[instance]]">
 				</ncg-graphic-instance>

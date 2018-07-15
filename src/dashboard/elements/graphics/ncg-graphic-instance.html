@@ -11,7 +11,7 @@
 				height: 35px;
 				box-sizing: border-box;
 				margin-left: 8px;
-				margin-right: 12px;
+				margin-right: 8px;
 				margin-bottom: 5px;
 				white-space: nowrap;
 				font-size: 18px;
@@ -40,10 +40,11 @@
 
 			#indicatorIcon {
 				@apply --layout-center-center;
+				@apply --layout-flex-none;
 				@apply --layout-horizontal;
+				background: #525F78;
 				border-right: 1px solid #6F7D99;
 				width: 38px;
-				background: #525F78;
 			}
 
 			:host([status="nominal"]) #indicatorIcon {
@@ -61,14 +62,18 @@
 				@apply --layout-center;
 				@apply --layout-horizontal;
 				background: #525F78;
-				overflow: hidden;
 				padding: 0 16px;
-				text-overflow: ellipsis;
 			}
 
 			#ip {
 				@apply --layout-flex;
 				border-right: 1px solid #6F7D99;
+				min-width: 0;
+			}
+
+			#ip-actual {
+				overflow: hidden;
+				text-overflow: ellipsis;
 			}
 
 			#status {
@@ -114,6 +119,33 @@
 			paper-button:last-child {
 				margin-right: 0;
 			}
+
+			:host([responsive-mode="medium"]) #status {
+				width: 94px;
+			}
+
+			:host([responsive-mode="medium"]) #duration {
+				width: 100px;
+			}
+
+			:host(:not([responsive-mode="wide"])) #ip,
+			:host(:not([responsive-mode="wide"])) #status,
+			:host(:not([responsive-mode="wide"])) #duration {
+				padding: 0 12px;
+			}
+
+			:host([responsive-mode="narrow"]) #status {
+				width: 91px;
+			}
+
+			:host([responsive-mode="narrow"]) #duration {
+				width: 69px;
+			}
+
+			:host([responsive-mode="narrow"]) #status,
+			:host([responsive-mode="narrow"]) #duration-icon {
+				display: none;
+			}
 		</style>
 
 		<div id="indicator"></div>
@@ -122,9 +154,11 @@
 			<iron-icon icon="[[_calcIndicatorIcon(status)]]"></iron-icon>
 		</div>
 
-		<div id="ip">[[instance.ipv4]]</div>
+		<div id="ip">
+			<div id="ip-actual" title="[[instance.ipv4]]">[[instance.ipv4]]</div>
+		</div>
 
-		<div id="status">[[_calcStatusMessage(status)]]</div>
+		<div id="status">[[_calcStatusMessage(status, responsiveMode)]]</div>
 
 		<div id="duration">
 			<iron-icon id="duration-icon" icon="device:access-time"></iron-icon>
