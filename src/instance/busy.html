@@ -57,7 +57,7 @@
 		_checkAvailability();
 
 		function _checkAvailability() {
-			window.socket.emit('isGraphicAvailable', qs['pathname'], function (available) {
+			window.socket.emit('graphic:queryAvailability', qs['pathname'], function (available) {
 				// If the graphic is available, go to it
 				if (available) {
 					window.location.href = qs['pathname'];
