@@ -1,8 +1,12 @@
 'use strict';
 
+// Native
+const path = require('path');
+
 // Packages
 const test = require('ava');
 const axios = require('axios');
+const replace = require('replace-in-file');
 
 // Ours
 require('./helpers/nodecg-and-webdriver')(test, {tabs: ['dashboard', 'single-instance']}); // Must be first.
@@ -68,4 +72,107 @@ test.serial('singleInstance - should redirect to killed.html when the instance i
 test.serial('singleInstance - should allow the graphic to be taken after being killed', async t => {
 	await e.browser.client.newWindow(C.SINGLE_INSTANCE_URL);
 	t.is(await e.browser.client.getUrl(), C.SINGLE_INSTANCE_URL);
+});
+
+test.serial('refreshAll button', async t => {
+	await e.browser.client.newWindow(C.GRAPHIC_URL);
+	await e.browser.client.executeAsync(done => {
+		if (window.__nodecgRegistrationAccepted__) {
+			finish();
+		} else {
+			window.addEventListener('nodecg-registration-accepted', finish);
+		}
+
+		function finish() {
+			window.__refreshMarker__ = '__refreshMarker__';
+			done();
+		}
+	});
+	const graphicTabId = await e.browser.client.getCurrentTabId();
+
+	await e.browser.client.switchTab(e.browser.tabs.dashboard);
+	await e.browser.client.execute(() => {
+		document.querySelector('ncg-dashboard').shadowRoot
+			.querySelector('ncg-graphics').shadowRoot
+			.querySelector('ncg-graphics-bundle').shadowRoot
+			.querySelectorAll('ncg-graphic')[0].$.reloadButton.click();
+	});
+
+	await e.browser.client.switchTab(graphicTabId);
+	const response = await e.browser.client.executeAsync(done => {
+		if (window.__nodecgRegistrationAccepted__) {
+			finish();
+		} else {
+			window.addEventListener('nodecg-registration-accepted', finish);
+		}
+
+		function finish() {
+			done(window.__refreshToken__);
+		}
+	});
+	t.is(response.value, null);
+});
+
+test.serial('refresh button', async t => {
+	await e.browser.client.newWindow(C.GRAPHIC_URL);
+	await e.browser.client.executeAsync(done => {
+		if (window.__nodecgRegistrationAccepted__) {
+			finish();
+		} else {
+			window.addEventListener('nodecg-registration-accepted', finish);
+		}
+
+		function finish() {
+			window.__refreshMarker__ = '__refreshMarker__';
+			done();
+		}
+	});
+	const graphicTabId = await e.browser.client.getCurrentTabId();
+
+	await e.browser.client.switchTab(e.browser.tabs.dashboard);
+	await e.browser.client.execute(() => {
+		document.querySelector('ncg-dashboard').shadowRoot
+			.querySelector('ncg-graphics').shadowRoot
+			.querySelector('ncg-graphics-bundle').shadowRoot
+			.querySelectorAll('ncg-graphic')[0].shadowRoot
+			.querySelectorAll('ncg-graphic-instance')[1].$.reloadButton.click();
+	});
+
+	await e.browser.client.switchTab(graphicTabId);
+	const response = await e.browser.client.executeAsync(done => {
+		if (window.__nodecgRegistrationAccepted__) {
+			finish();
+		} else {
+			window.addEventListener('nodecg-registration-accepted', finish);
+		}
+
+		function finish() {
+			done(window.__refreshToken__);
+		}
+	});
+	await e.browser.client.close(); // We don't need the coverage data from this tab.
+	t.is(response.value, null);
+});
+
+test.serial('displays a warning when an instance is out of date', async t => {
+	replace.sync({
+		files: path.resolve(process.env.NODECG_ROOT, 'bundles/test-bundle/package.json'),
+		from: '"version": "0.0.1"',
+		to: '"version": "0.0.2"'
+	});
+
+	await e.sleep(1500);
+
+	await e.browser.client.switchTab(e.browser.tabs.dashboard);
+	const response = await e.browser.client.execute(() => {
+		const element = document.querySelector('ncg-dashboard').shadowRoot
+			.querySelector('ncg-graphics').shadowRoot
+			.querySelector('ncg-graphics-bundle').shadowRoot
+			.querySelectorAll('ncg-graphic')[0].shadowRoot
+			.querySelector('ncg-graphic-instance[status="out-of-date"]');
+
+		return element ? element.$.status.textContent.trim() : undefined;
+	});
+
+	t.is(response.value, 'Potentially Out of Date');
 });

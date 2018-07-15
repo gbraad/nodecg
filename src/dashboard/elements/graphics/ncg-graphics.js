@@ -35,10 +35,6 @@ class NcgGraphics extends Polymer.MutableData(Polymer.Element) {
 			this.$.copyToast.show('Failed to copy graphic URL to clipboard!');
 		});
 	}
-
-	_isSingleInstance(registration) {
-		return registration && registration.singleInstance;
-	}
 }
 
 customElements.define('ncg-graphics', NcgGraphics);

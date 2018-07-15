@@ -100,6 +100,7 @@
 
 	customElements.define(NcgGraphicInstance.is, NcgGraphicInstance);
 
+	/* istanbul ignore next: not really easy or that important to test */
 	function timeSince(date) {
 		const seconds = Math.floor((new Date().getTime() / 1000) - (date / 1000));
 		let interval = Math.floor(seconds / 31536000);

@@ -58,10 +58,12 @@
 			});
 		}
 
+		/* istanbul ignore next: trivial */
 		toggleCollapse() {
 			this.$.instancesCollapse.toggle();
 		}
 
+		/* istanbul ignore next: we dont currently test responsiveness */
 		_computeResponsiveMode(_wide, _medium, _narrow) {
 			if (_wide) {
 				return 'wide';
@@ -77,10 +79,12 @@
 		}
 
 		_initClipboard(clipboard) {
+			/* istanbul ignore next: cant figure out how to test these */
 			clipboard.on('success', () => {
 				this.dispatchEvent(new CustomEvent('url-copy-success', {bubbles: true, composed: true}));
 				this.$.copyToast.show('Graphic URL copied to clipboard.');
 			});
+			/* istanbul ignore next: cant figure out how to test these */
 			clipboard.on('error', e => {
 				this.dispatchEvent(new CustomEvent('url-copy-error', {bubbles: true, composed: true}));
 				this.$.copyToast.show('Failed to copy graphic URL to clipboard!');

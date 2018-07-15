@@ -7,7 +7,7 @@
 	let pathname = window.location.pathname;
 
 	// If the pathname ends with /bundleName/ then we must be on index.html.
-	if (pathname.endsWith(nodecg.bundleName + '/')) {
+	if (pathname.endsWith(`/${nodecg.bundleName}/graphics/`)) {
 		pathname += 'index.html';
 	}
 
@@ -35,6 +35,7 @@
 		}
 	});
 
+	/* istanbul ignore next: cant cover navigates page */
 	window.socket.on('graphic:refreshAll', graphic => {
 		if (!graphic) {
 			return;
@@ -49,6 +50,7 @@
 	// On page load, register this socket with its URL pathname, so that the server can keep track of it.
 	// In single-instance graphics, this registration will be rejected if the graphic is already open elsewhere.
 	register();
+	/* istanbul ignore next: hard to test reconnection stuff right now */
 	window.socket.on('reconnect', () => {
 		register();
 	});
@@ -62,7 +64,11 @@
 			bundleGit: nodecg.bundleGit
 		}, accepted => {
 			/* istanbul ignore if: cant cover navigates page */
-			if (!accepted) {
+			if (accepted) {
+				window.dispatchEvent(new CustomEvent('nodecg-registration-accepted'));
+				window.__nodecgRegistrationAccepted__ = true;
+			} else {
+				/* istanbul ignore next: cant cover navigates page */
 				window.location.href = '/instance/busy.html?pathname=' + pathname;
 			}
 		});
