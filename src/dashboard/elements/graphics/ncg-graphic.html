@@ -38,14 +38,9 @@
 				background-color: #FFC700;
 			}
 
-			#urlAndResolution {
-				@apply --layout-flex;
-				background-color: #525F78;
-				margin-right: 1px;
-			}
-
 			#counter {
 				@apply --layout-center-center;
+				@apply --layout-flex-none;
 				@apply --layout-horizontal;
 				background-color: #525F78;
 				color: #FFFFFF;
@@ -57,6 +52,13 @@
 				padding-right: 8px;
 				text-align: center;
 				width: 38px;
+			}
+
+			#urlAndResolution {
+				@apply --layout-flex;
+				background-color: #525F78;
+				margin-right: 1px;
+				min-width: 0;
 			}
 
 			#url {
@@ -110,6 +112,7 @@
 
 			paper-button {
 				@apply --layout-center-center;
+				@apply --layout-flex-none;
 				@apply --layout-horizontal;
 				border-radius: 0;
 				font-size: 14px;
@@ -166,7 +169,7 @@
 			<div id="counter">[[_calcCount(graphic.singleInstance, instances)]]</div>
 
 			<div id="urlAndResolution">
-				<a id="url" href$="[[_computeFullGraphicUrl(graphic.url)]]" target="_blank">
+				<a id="url" href$="[[_computeFullGraphicUrl(graphic.url)]]" target="_blank" title="[[_calcShortUrl(graphic.url)]]">
 					[[_calcShortUrl(graphic.url)]]
 				</a>
 				<div id="resolution">[[graphic.width]]x[[graphic.height]]</div>
