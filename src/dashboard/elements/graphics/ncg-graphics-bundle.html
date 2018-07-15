@@ -1,0 +1,32 @@
+<link rel="import" href="ncg-graphic.html">
+
+<dom-module id="ncg-graphics-bundle">
+	<template>
+		<style>
+			:host {
+				@apply --layout-flex-none;
+				@apply --layout-vertical;
+				@apply --shadow-elevation-2dp;
+				background: #2F3A4F;
+				color: white;
+				margin-bottom: 20px;
+			}
+
+			#bundleName {
+				font-size: 24px;
+				font-style: normal;
+				font-weight: normal;
+				line-height: normal;
+				margin: 15px 17px;
+			}
+		</style>
+
+		<div id="bundleName">[[bundle.name]]</div>
+
+		<template is="dom-repeat" items="[[bundle.graphics]]" as="graphic">
+			<ncg-graphic graphic="[[graphic]]"></ncg-graphic>
+		</template>
+	</template>
+
+	<script src="ncg-graphics-bundle.js"></script>
+</dom-module>
