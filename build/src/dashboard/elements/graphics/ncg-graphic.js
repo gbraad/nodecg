@@ -19,11 +19,6 @@
 				instances: {
 					type: Array
 				},
-				worstStatus: {
-					type: String,
-					reflectToAttribute: true,
-					computed: '_computeWorstStatus(instances)'
-				},
 				responsiveMode: {
 					type: String,
 					reflectToAttribute: true,
@@ -98,29 +93,8 @@
 			return absUrl;
 		}
 
-		_computeWorstStatus(instances) {
-			if (!instances || instances.length <= 0) {
-				return 'none';
-			}
-
-			const outOfDateInstance = instances.find(instance => instance.potentiallyOutOfDate);
-			return outOfDateInstance ? 'out-of-date' : 'nominal';
-		}
-
-		_calcCount(singleInstance, instances) {
-			if (singleInstance) {
-				return 'S';
-			}
-
-			return instances ? instances.length : '?';
-		}
-
 		_computeCollapseIcon(_collapseOpened) {
 			return _collapseOpened ? 'unfold-less' : 'unfold-more';
-		}
-
-		_calcReloadAllDisabled(instances) {
-			return !instances || instances.length <= 0;
 		}
 	}
 

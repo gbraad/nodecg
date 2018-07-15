@@ -10,13 +10,27 @@
 		pathname += 'index.html';
 	}
 
-	// The dashboard will have some kind of killswitch to destroy all instances of a singleInstance graphic.
-	// This includes the active instance *and* all "busy" pages waiting for that graphic to become available.
 	/* istanbul ignore next: cant cover navigates page */
-	window.socket.on('graphic:killed', killedPath => {
-		if (killedPath === pathname) {
+	window.socket.on('graphic:kill', instance => {
+		if (!instance) {
+			return;
+		}
+
+		if (instance.socketId === window.socket.id) {
 			/* istanbul ignore next: cant cover navigates page */
 			window.location.href = '/instance/killed.html?pathname=' + pathname;
+		}
+	});
+
+	/* istanbul ignore next: cant cover navigates page */
+	window.socket.on('graphic:refresh', instance => {
+		if (!instance) {
+			return;
+		}
+
+		if (instance.socketId === window.socket.id) {
+			/* istanbul ignore next: cant cover navigates page */
+			window.location.reload();
 		}
 	});
 
@@ -29,8 +43,10 @@
 
 	function register() {
 		window.socket.emit('graphic:registerSocket', {
+			timestamp: Date.now(),
 			pathName: pathname,
 			bundleName: nodecg.bundleName,
+			bundleVersion: nodecg.bundleVersion,
 			bundleGit: nodecg.bundleGit
 		}, accepted => {
 			/* istanbul ignore if: cant cover navigates page */

@@ -23,8 +23,11 @@
 
 		<div id="bundleName">[[bundle.name]]</div>
 
-		<template is="dom-repeat" items="[[bundle.graphics]]" as="graphic">
-			<ncg-graphic graphic="[[graphic]]"></ncg-graphic>
+		<template is="dom-repeat" items="[[bundle.graphics]]" as="graphic" mutable-data>
+			<ncg-graphic
+				graphic="[[graphic]]"
+				instances="[[_calcGraphicInstances(bundle, graphic, instances)]]">
+			</ncg-graphic>
 		</template>
 	</template>
 

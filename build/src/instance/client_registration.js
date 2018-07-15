@@ -31,6 +31,7 @@
 		window.socket.emit('graphic:registerSocket', {
 			pathName: pathname,
 			bundleName: nodecg.bundleName,
+			bundleVersion: nodecg.bundleVersion,
 			bundleGit: nodecg.bundleGit
 		}, accepted => {
 			/* istanbul ignore if: cant cover navigates page */

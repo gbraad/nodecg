@@ -22,28 +22,10 @@ class NcgGraphics extends Polymer.MutableData(Polymer.Element) {
 
 	ready() {
 		super.ready();
-		const instancesList = this.$.instancesList;
-		const empty = this.$['instancesList-empty'];
 		const instancesRep = new NodeCG.Replicant('graphics:instances', 'nodecg');
 
 		instancesRep.on('change', newVal => {
 			this._graphicInstances = newVal;
-		});
-
-		// Observe #instancesList
-		const observer = new MutationObserver(() => {
-			if (instancesList.firstChild) {
-				instancesList.style.display = 'block';
-				empty.style.display = 'none';
-			} else {
-				instancesList.style.display = 'none';
-				empty.style.display = 'flex';
-			}
-		});
-
-		observer.observe(instancesList, {
-			childList: true,
-			subtree: true
 		});
 
 		this.addEventListener('url-copy-success', () => {

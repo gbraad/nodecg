@@ -6,7 +6,16 @@
 		"type": "object",
 		"additionalProperties": false,
 		"properties": {
+			"ipv4": {
+				"type": "string"
+			},
+			"timestamp": {
+				"type": "number"
+			},
 			"bundleName": {
+				"type": "string"
+			},
+			"bundleVersion": {
 				"type": "string"
 			},
 			"bundleGit": {
@@ -20,8 +29,20 @@
 			},
 			"socketId": {
 				"type": "string"
+			},
+			"potentiallyOutOfDate": {
+				"type": "boolean"
 			}
 		},
-		"required": ["bundleName", "pathName", "socketId"]
+		"required": [
+			"ipv4",
+			"timestamp",
+			"bundleName",
+			"bundleVersion",
+			"pathName",
+			"singleInstance",
+			"socketId",
+			"potentiallyOutOfDate"
+		]
 	}
 }
