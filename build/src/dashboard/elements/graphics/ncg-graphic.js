@@ -30,8 +30,7 @@
 					computed: '_computeResponsiveMode(_wide, _medium, _narrow)'
 				},
 				_collapseOpened: {
-					type: Boolean,
-					value: true // @TODO: remove this
+					type: Boolean
 				},
 				_wide: {
 					type: Boolean
