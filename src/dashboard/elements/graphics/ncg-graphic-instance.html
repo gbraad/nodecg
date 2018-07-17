@@ -1,23 +1,25 @@
 <link rel="import" href="../../../../bower_components/iron-icons/device-icons.html">
 <link rel="import" href="../../../../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../../../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="ncg-graphic-instance-diff.html">
 
 <dom-module id="ncg-graphic-instance">
 	<template>
 		<style>
 			:host {
-				@apply --layout-horizontal;
 				@apply --layout-flex-none;
-				height: 35px;
+				@apply --layout-horizontal;
 				box-sizing: border-box;
-				margin-left: 8px;
-				margin-right: 8px;
-				margin-bottom: 5px;
-				white-space: nowrap;
 				font-size: 18px;
 				font-style: normal;
 				font-weight: 500;
+				height: 35px;
 				line-height: normal;
+				margin-bottom: 5px;
+				margin-left: 8px;
+				margin-right: 8px;
+				position: relative;
+				white-space: nowrap;
 			}
 
 			:host(:first-child) {
@@ -54,6 +56,10 @@
 			:host([status="out-of-date"]) #indicatorIcon,
 			:host([status="out-of-date"]) #status {
 				color: #FFC700;
+			}
+
+			:host([status="out-of-date"]) #status {
+				cursor: help;
 			}
 
 			#ip,
@@ -105,6 +111,13 @@
 				}
 			}
 
+			#diff {
+				transition: opacity 150ms ease-in-out;
+				z-index: 1;
+				top: 38px;
+				left: 40px
+			}
+
 			paper-button {
 				@apply --layout-center-center;
 				@apply --layout-flex-none;
@@ -147,9 +160,28 @@
 				display: none;
 			}
 
+			:host([responsive-mode="narrow"]) #diff {
+				left: 0;
+			}
+
 			:host([status="closed"]) {
 				opacity: 0;
 				transition: opacity 0.9s ease-out;
+			}
+
+			:host(:not([status="out-of-date"])) #diff {
+				display: none;
+			}
+
+			:host([status="out-of-date"][status-hover]) #diff {
+				opacity: 1;
+				pointer-events: initial;
+			}
+
+			:host(:not([status-hover])) #diff {
+				display: none;
+				opacity: 0;
+				pointer-events: none;
 			}
 		</style>
 
@@ -177,6 +209,8 @@
 		<paper-button id="killButton" on-tap="kill" hidden="[[!graphic.singleInstance]]">
 			<iron-icon icon="close"></iron-icon>
 		</paper-button>
+
+		<ncg-graphic-instance-diff id="diff" instance="[[instance]]"></ncg-graphic-instance-diff>
 	</template>
 
 	<script src="ncg-graphic-instance.js"></script>

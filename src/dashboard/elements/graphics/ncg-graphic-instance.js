@@ -32,6 +32,11 @@
 					type: String,
 					reflectToAttribute: true,
 					computed: '_computeStatus(instance)'
+				},
+				statusHover: {
+					type: Boolean,
+					reflectToAttribute: true,
+					value: false
 				}
 			};
 		}
@@ -41,6 +46,43 @@
 			pulseElement.addEventListener('pulse', e => {
 				this._pulse = e.detail.timestamp;
 			});
+
+			const showDiff = () => {
+				clearTimeout(this._offTimeout);
+				this._offTimeout = null;
+				this.statusHover = true;
+			};
+
+			const hideDiff = immediate => {
+				if (immediate) {
+					clearTimeout(this._offTimeout);
+					this._offTimeout = null;
+					this.statusHover = false;
+				} else if (!this._offTimeout) {
+					this._offTimeout = setTimeout(() => {
+						clearTimeout(this._offTimeout);
+						this._offTimeout = null;
+						this.statusHover = false;
+					}, 250);
+				}
+			};
+
+			this.$.indicatorIcon.addEventListener('mouseenter', () => {
+				if (this.responsiveMode === 'narrow') {
+					showDiff();
+				}
+			});
+			this.$.status.addEventListener('mouseenter', showDiff);
+			this.$.diff.addEventListener('mouseenter', showDiff);
+
+			this.$.indicatorIcon.addEventListener('mouseleave', () => {
+				if (this.responsiveMode === 'narrow') {
+					hideDiff(false);
+				}
+			});
+			this.$.status.addEventListener('mouseleave', () => hideDiff(false));
+			this.$.diff.addEventListener('mouseleave', () => hideDiff(false));
+			this.$.diff.addEventListener('close', () => hideDiff(true));
 		}
 
 		reload() {
