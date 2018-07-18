@@ -30,6 +30,7 @@
 
 			if (!bundlesRep) {
 				bundlesRep = new NodeCG.Replicant('bundles', 'nodecg');
+				bundlesRep.setMaxListeners(99);
 			}
 
 			bundlesRep.on('change', () => {

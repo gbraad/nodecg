@@ -47,6 +47,18 @@
 		}
 	});
 
+	/* istanbul ignore next: cant cover navigates page */
+	window.socket.on('graphic:bundleRefresh', bundleName => {
+		if (!bundleName) {
+			return;
+		}
+
+		if (bundleName === nodecg.bundleName) {
+			/* istanbul ignore next: cant cover navigates page */
+			window.location.reload();
+		}
+	});
+
 	// On page load, register this socket with its URL pathname, so that the server can keep track of it.
 	// In single-instance graphics, this registration will be rejected if the graphic is already open elsewhere.
 	register();

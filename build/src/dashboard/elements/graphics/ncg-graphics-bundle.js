@@ -18,6 +18,10 @@
 			};
 		}
 
+		showReloadAllConfirmDialog() {
+			this.$.reloadAllConfirmDialog.open();
+		}
+
 		_calcGraphicInstances(bundle, graphic, instances) {
 			if (!graphic || !Array.isArray(instances)) {
 				return [];
@@ -27,6 +31,15 @@
 				return instance.bundleName === bundle.name &&
 					instance.pathName === graphic.url;
 			});
+		}
+
+		_handleReloadAllConfirmDialogClose(e) {
+			if (e.detail.confirmed) {
+				this.$.reloadButton.disabled = true;
+				window.socket.emit('graphic:requestBundleRefresh', this.bundle.name, () => {
+					this.$.reloadButton.disabled = false;
+				});
+			}
 		}
 	}
 
