@@ -1,12 +1,14 @@
 'use strict';
 
 // Native
+const fs = require('fs');
 const path = require('path');
 
 // Packages
-const test = require('ava');
 const axios = require('axios');
+const simpleGit = require('simple-git/promise');
 const replace = require('replace-in-file');
+const test = require('ava');
 
 // Ours
 require('./helpers/nodecg-and-webdriver')(test, {tabs: ['dashboard', 'single-instance']}); // Must be first.
@@ -88,6 +90,7 @@ test.serial('refresh all instances in a bundle', async t => {
 	await util.waitForRegistration();
 
 	await e.browser.client.switchTab(e.browser.tabs.dashboard);
+	await util.sleep(50);
 	await e.browser.client.execute(() => {
 		const graphicsBundleEl = document.querySelector('ncg-dashboard').shadowRoot
 			.querySelector('ncg-graphics').shadowRoot
@@ -108,6 +111,7 @@ test.serial('refresh all instances of a graphic', async t => {
 	await util.waitForRegistration();
 
 	await e.browser.client.switchTab(e.browser.tabs.dashboard);
+	await util.sleep(50);
 	await e.browser.client.click('ncg-dashboard ncg-graphics ncg-graphics-bundle' +
 		' ncg-graphic #reloadButton');
 
@@ -124,15 +128,13 @@ test.serial('refresh individual instance', async t => {
 	await util.waitForRegistration();
 
 	await e.browser.client.switchTab(e.browser.tabs.dashboard);
-	await util.sleep(500);
-	/* Await e.browser.client.click('ncg-dashboard ncg-graphics ncg-graphics-bundle' +
-		' ncg-graphic ncg-graphic-instance:last-of-type #reloadButton'); */
+	await util.sleep(50);
 	await e.browser.client.execute(() => {
 		document.querySelector('ncg-dashboard').shadowRoot
 			.querySelector('ncg-graphics').shadowRoot
 			.querySelector('ncg-graphics-bundle').shadowRoot
 			.querySelectorAll('ncg-graphic')[0].shadowRoot
-			.querySelectorAll('ncg-graphic-instance')[1].$.reloadButton.click();
+			.querySelector('ncg-graphic-instance:last-of-type').$.reloadButton.click();
 	});
 
 	await e.browser.client.switchTab(graphicTabId);
@@ -142,18 +144,45 @@ test.serial('refresh individual instance', async t => {
 	t.is(refreshMarker, null);
 });
 
-test.serial('displays a warning when an instance is out of date', async t => {
+test.serial('version out of date', async t => {
 	replace.sync({
 		files: path.resolve(process.env.NODECG_ROOT, 'bundles/test-bundle/package.json'),
 		from: '"version": "0.0.1"',
 		to: '"version": "0.0.2"'
 	});
+	await util.sleep(1500);
 
+	await e.browser.client.switchTab(e.browser.tabs.dashboard);
+	let text = await e.browser.client.getText('ncg-dashboard ncg-graphics ncg-graphics-bundle ' +
+		'ncg-graphic ncg-graphic-instance:last-of-type #status');
+	t.is(text, 'Potentially Out of Date');
+
+	replace.sync({
+		files: path.resolve(process.env.NODECG_ROOT, 'bundles/test-bundle/package.json'),
+		from: '"version": "0.0.2"',
+		to: '"version": "0.0.1"'
+	});
+	await util.sleep(1500);
+
+	await e.browser.client.switchTab(e.browser.tabs.dashboard);
+	text = await e.browser.client.getText('ncg-dashboard ncg-graphics ncg-graphics-bundle ' +
+		'ncg-graphic ncg-graphic-instance:last-of-type #status');
+	t.is(text, 'Latest');
+});
+
+test.serial('git out of date', async t => {
+	fs.writeFileSync(
+		path.resolve(process.env.NODECG_ROOT, 'bundles/test-bundle/new_file.txt'),
+		'foo'
+	);
+	const git = simpleGit(path.resolve(process.env.NODECG_ROOT, 'bundles/test-bundle'));
+	await git.add('./new_file.txt');
+	await git.commit('new commit');
 	await util.sleep(1500);
 
 	await e.browser.client.switchTab(e.browser.tabs.dashboard);
 	const text = await e.browser.client.getText('ncg-dashboard ncg-graphics ncg-graphics-bundle ' +
-		'ncg-graphic ncg-graphic-instance[status="out-of-date"] #status');
+		'ncg-graphic ncg-graphic-instance:last-of-type #status');
 	t.is(text, 'Potentially Out of Date');
 });
 
@@ -166,5 +195,6 @@ test.serial('shows a diff when hovering over "potentially out of date" status', 
 		'ncg-graphic ncg-graphic-instance[status="out-of-date"] #diff';
 	await e.browser.client.isVisible(diffSelector);
 	const diffText = await e.browser.client.getText(diffSelector);
-	t.is(diffText, 'Current:  0.0.1 - 6262681 [Initial commit]\nLatest:   0.0.2 - 6262681 [Initial commit]');
+
+	t.true(/Current: 0\.0\.1 - 6262681 \[Initial commit]\nLatest: {2}0\.0\.1 - .{7} \[new commit]/.test(diffText));
 });

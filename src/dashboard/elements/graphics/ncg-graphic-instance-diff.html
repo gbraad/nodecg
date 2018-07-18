@@ -37,13 +37,13 @@
 		<paper-icon-button icon="close" on-tap="close"></paper-icon-button>
 		<div id="body">
 			<div class="line" style="margin-bottom: 4px;">
-				<span class="orange">Current:&nbsp;</span>
+				<span class="orange">Current:</span>
 				<span class="details">
 					[[instance.bundleVersion]] - [[instance.bundleGit.shortHash]] [[_formatCommitMessage(instance.bundleGit.message)]]
 				</span>
 			</div>
 			<div class="line" style="margin-top: 4px;">
-				<span class="green">Latest:&nbsp;&nbsp;</span>
+				<span class="green">Latest:&nbsp;</span>
 				<span class="details">
 					[[_bundleVersion]] - [[_bundleGit.shortHash]] [[_formatCommitMessage(_bundleGit.message)]]
 				</span>
