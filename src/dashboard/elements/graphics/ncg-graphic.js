@@ -58,7 +58,6 @@
 			});
 		}
 
-		/* istanbul ignore next: trivial */
 		toggleCollapse() {
 			this.$.instancesCollapse.toggle();
 		}

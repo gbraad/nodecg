@@ -12,6 +12,13 @@ const replace = require('replace-in-file');
 require('./helpers/nodecg-and-webdriver')(test, {tabs: ['dashboard', 'single-instance']}); // Must be first.
 const C = require('./helpers/test-constants');
 const e = require('./helpers/test-environment');
+const util = require('./helpers/utilities');
+
+test.before(async () => {
+	await e.browser.client.switchTab(e.browser.tabs.dashboard);
+	await e.browser.client.click('ncg-dashboard paper-tab[data-route="graphics"]');
+	await e.browser.client.click('ncg-dashboard ncg-graphics ncg-graphics-bundle ncg-graphic #collapseButton');
+});
 
 test.beforeEach(async () => {
 	await e.browser.client.switchTab(e.browser.tabs.singleInstance);
@@ -45,7 +52,7 @@ test.serial.cb('singleInstance - shouldn\'t enter an infinite redirect loop when
 
 test.serial('singleInstance - should redirect to busy.html when the instance is already taken', async t => {
 	await e.browser.client.newWindow(C.SINGLE_INSTANCE_URL);
-	await e.sleep(1000);
+	await util.sleep(1000);
 	t.is(
 		await e.browser.client.getUrl(),
 		`${C.ROOT_URL}instance/busy.html?pathname=/bundles/test-bundle/graphics/single_instance.html`
@@ -71,66 +78,55 @@ test.serial('singleInstance - should redirect to killed.html when the instance i
 
 test.serial('singleInstance - should allow the graphic to be taken after being killed', async t => {
 	await e.browser.client.newWindow(C.SINGLE_INSTANCE_URL);
-	await e.sleep(500);
+	await util.sleep(500);
 	t.is(await e.browser.client.getUrl(), C.SINGLE_INSTANCE_URL);
 });
 
-test.serial('refreshAll button', async t => {
+test.serial('refresh all instances in a bundle', async t => {
 	await e.browser.client.newWindow(C.GRAPHIC_URL);
-	await e.browser.client.executeAsync(done => {
-		if (window.__nodecgRegistrationAccepted__) {
-			finish();
-		} else {
-			window.addEventListener('nodecg-registration-accepted', finish);
-		}
-
-		function finish() {
-			window.__refreshMarker__ = '__refreshMarker__';
-			done();
-		}
-	});
 	const graphicTabId = await e.browser.client.getCurrentTabId();
+	await util.waitForRegistration();
 
 	await e.browser.client.switchTab(e.browser.tabs.dashboard);
 	await e.browser.client.execute(() => {
-		document.querySelector('ncg-dashboard').shadowRoot
+		const graphicsBundleEl = document.querySelector('ncg-dashboard').shadowRoot
 			.querySelector('ncg-graphics').shadowRoot
-			.querySelector('ncg-graphics-bundle').shadowRoot
-			.querySelectorAll('ncg-graphic')[0].$.reloadButton.click();
+			.querySelector('ncg-graphics-bundle');
+		graphicsBundleEl.$.reloadButton.click();
+		graphicsBundleEl.shadowRoot.querySelector('paper-button[dialog-confirm]').click();
 	});
 
 	await e.browser.client.switchTab(graphicTabId);
-	const response = await e.browser.client.executeAsync(done => {
-		if (window.__nodecgRegistrationAccepted__) {
-			finish();
-		} else {
-			window.addEventListener('nodecg-registration-accepted', finish);
-		}
-
-		function finish() {
-			done(window.__refreshToken__);
-		}
-	});
-	t.is(response.value, null);
+	await util.sleep(500);
+	const refreshMarker = await util.waitForRegistration();
+	t.is(refreshMarker, null);
 });
 
-test.serial('refresh button', async t => {
+test.serial('refresh all instances of a graphic', async t => {
 	await e.browser.client.newWindow(C.GRAPHIC_URL);
-	await e.browser.client.executeAsync(done => {
-		if (window.__nodecgRegistrationAccepted__) {
-			finish();
-		} else {
-			window.addEventListener('nodecg-registration-accepted', finish);
-		}
-
-		function finish() {
-			window.__refreshMarker__ = '__refreshMarker__';
-			done();
-		}
-	});
 	const graphicTabId = await e.browser.client.getCurrentTabId();
+	await util.waitForRegistration();
 
 	await e.browser.client.switchTab(e.browser.tabs.dashboard);
+	await e.browser.client.click('ncg-dashboard ncg-graphics ncg-graphics-bundle' +
+		' ncg-graphic #reloadButton');
+
+	await e.browser.client.switchTab(graphicTabId);
+	await util.sleep(500);
+	const refreshMarker = await util.waitForRegistration();
+	await e.browser.client.close(); // We don't need the coverage data from this tab.
+	t.is(refreshMarker, null);
+});
+
+test.serial('refresh individual instance', async t => {
+	await e.browser.client.newWindow(C.GRAPHIC_URL);
+	const graphicTabId = await e.browser.client.getCurrentTabId();
+	await util.waitForRegistration();
+
+	await e.browser.client.switchTab(e.browser.tabs.dashboard);
+	await util.sleep(500);
+	/* Await e.browser.client.click('ncg-dashboard ncg-graphics ncg-graphics-bundle' +
+		' ncg-graphic ncg-graphic-instance:last-of-type #reloadButton'); */
 	await e.browser.client.execute(() => {
 		document.querySelector('ncg-dashboard').shadowRoot
 			.querySelector('ncg-graphics').shadowRoot
@@ -140,19 +136,10 @@ test.serial('refresh button', async t => {
 	});
 
 	await e.browser.client.switchTab(graphicTabId);
-	const response = await e.browser.client.executeAsync(done => {
-		if (window.__nodecgRegistrationAccepted__) {
-			finish();
-		} else {
-			window.addEventListener('nodecg-registration-accepted', finish);
-		}
-
-		function finish() {
-			done(window.__refreshToken__);
-		}
-	});
+	await util.sleep(1000);
+	const refreshMarker = await util.waitForRegistration();
 	await e.browser.client.close(); // We don't need the coverage data from this tab.
-	t.is(response.value, null);
+	t.is(refreshMarker, null);
 });
 
 test.serial('displays a warning when an instance is out of date', async t => {
@@ -162,18 +149,22 @@ test.serial('displays a warning when an instance is out of date', async t => {
 		to: '"version": "0.0.2"'
 	});
 
-	await e.sleep(1500);
+	await util.sleep(1500);
 
 	await e.browser.client.switchTab(e.browser.tabs.dashboard);
-	const response = await e.browser.client.execute(() => {
-		const element = document.querySelector('ncg-dashboard').shadowRoot
-			.querySelector('ncg-graphics').shadowRoot
-			.querySelector('ncg-graphics-bundle').shadowRoot
-			.querySelectorAll('ncg-graphic')[0].shadowRoot
-			.querySelector('ncg-graphic-instance[status="out-of-date"]');
+	const text = await e.browser.client.getText('ncg-dashboard ncg-graphics ncg-graphics-bundle ' +
+		'ncg-graphic ncg-graphic-instance[status="out-of-date"] #status');
+	t.is(text, 'Potentially Out of Date');
+});
 
-		return element ? element.$.status.textContent.trim() : undefined;
-	});
+test.serial('shows a diff when hovering over "potentially out of date" status', async t => {
+	await e.browser.client.switchTab(e.browser.tabs.dashboard);
+	await e.browser.client.moveToObject('ncg-dashboard ncg-graphics ncg-graphics-bundle ' +
+		'ncg-graphic ncg-graphic-instance[status="out-of-date"] #status');
 
-	t.is(response.value, 'Potentially Out of Date');
+	const diffSelector = 'ncg-dashboard ncg-graphics ncg-graphics-bundle ' +
+		'ncg-graphic ncg-graphic-instance[status="out-of-date"] #diff';
+	await e.browser.client.isVisible(diffSelector);
+	const diffText = await e.browser.client.getText(diffSelector);
+	t.is(diffText, 'Current:  0.0.1 - 6262681 [Initial commit]\nLatest:   0.0.2 - 6262681 [Initial commit]');
 });
