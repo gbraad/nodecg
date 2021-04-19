@@ -51,7 +51,7 @@
     "passport-local": "^1.0.0",
     "passport-steam": "^1.0.10",
     "passport-twitch-helix": "^1.1.0",
-    "pug": "^2.0.0-rc.4",
+    "pug": "^3.0.1",
     "raven": "^2.2.1",
     "semver": "^5.4.1",
     "serialize-error": "^2.1.0",
